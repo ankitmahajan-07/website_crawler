@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
+import urllib.request
 import os
 url = ''
 def createProjectDirectory():
@@ -15,10 +16,11 @@ def createProjectDirectory():
 
 def getIndexHtml(indexFile, path):          
     global url
-    url = 'https://codershouse.eu'
+    url = 'http://www.exelient.in'
     r = requests.get(url)
     content = BeautifulSoup(r.content, "html5lib")
     indexFile.write(str(content))
+    downloadImages(content, path)
     findAllAnchors(content, path)
 
 def writeIntoFiles(url,file):
@@ -90,6 +92,7 @@ def makeHtmlFile(fileName, path,url):
         r = requests.get(url)
         content = BeautifulSoup(r.content, "html5lib")
         file.write(str(content))
+        downloadImages(content, path)
         return file
     except OSError:
         print("Creation of the directory %s failed" % path)
@@ -99,6 +102,26 @@ def createSubDirectories(path):
         os.makedirs(path)
     except OSError:
         print("Creation of the sub-directory %s failed" % path)
+
+def downloadImages(content, path):
+    global url
+    imgs = content.find_all("img")
+    srcs = []
+    for img in imgs:
+        raw_src = str(img).split('src="')
+        src = raw_src[1].split('"')
+        srcs.append(src[0])
+    for src in srcs:
+        if src[0:3] == 'http':
+            fileName = path+'/'+src
+            urllib.request.urlretrieve(src, fileName)
+        else:
+            mySrc = url + '/' + src
+            nameLength = len(src.split('/')[-1])
+            newPath = path+'/'+src[0:len(src)-nameLength-1]
+            createSubDirectories(newPath)
+            fileName = path+'/'+src
+            urllib.request.urlretrieve(mySrc, fileName)
 
 
 createProjectDirectory()
