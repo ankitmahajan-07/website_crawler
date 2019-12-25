@@ -17,7 +17,7 @@ def createProjectDirectory():
 
 def getIndexHtml(indexFile, path):          
     global url
-    url = 'http://www.exelient.in'
+    url = 'https://www.codegaragetech.com'
     r = requests.get(url)
     content = BeautifulSoup(r.content, "html5lib")
     indexFile.write(str(content))
@@ -141,16 +141,20 @@ def downloadImages(content, path):
         if src[0:4] == 'http':
             continue
         else:
-            if src[0] == '/':
-                src = src[1:]
-            src = src.replace(' ', '%20')
-            mySrc = url + '/' + src
-            nameLength = len(src.split('/')[-1])
-            newPath = path+'/'+src[0:len(src)-nameLength-1]
-            createSubDirectories(newPath)
-            fileName = path+'/'+src.replace('%20', ' ')
-            print('Downloading ',fileName)
-            urllib.request.urlretrieve(mySrc, fileName)
+            try:
+                if src[0] == '/':
+                    src = src[1:]
+                src = src.replace(' ', '%20')
+                mySrc = url + '/' + src
+                nameLength = len(src.split('/')[-1])
+                newPath = path+'/'+src[0:len(src)-nameLength-1]
+                createSubDirectories(newPath)
+                fileName = path+'/'+src.replace('%20', ' ')
+                print('Downloading ',fileName)
+                urllib.request.urlretrieve(mySrc, fileName)
+            except:
+                # if src[-3:] != 'png' or src[-3:] != 'jpg' or src[-3:] != 'svg' or src[-3:] == 'peg':
+                continue
 
     divs = content.find_all('div')
     for div in divs:
@@ -175,6 +179,8 @@ def findCss(content, path):
     for link in links:
         if link['href'][-4:] == '.css' and link['href'][:4]!='http':
             src = link['href']
+            if src[0] == '/':
+                src = src[1:]
             mySrc = url + '/' + src
             nameLength = len(src.split('/')[-1])
             newPath = path + '/' + src[0:len(src) - nameLength - 1]
@@ -186,6 +192,8 @@ def findCss(content, path):
             file.write(str(content)[25:-14])
         if link['href'][-4:] == '.png' or link['href'][-4:] == '.jpg':
             src = link['href']
+            if src[0] == '/':
+                src = src[1:]
             mySrc = url + '/' + src
             nameLength = len(src.split('/')[-1])
             newPath = path + '/' + src[0:len(src) - nameLength - 1]
@@ -200,6 +208,8 @@ def findJs(content, path):
         try:
             if link['src'][-3:] == '.js' and link['src'][:4]!='http':
                 src = link['src']
+                if src[0] == '/':
+                    src = src[1:]
                 mySrc = url + '/' + src
                 nameLength = len(src.split('/')[-1])
                 newPath = path + '/' + src[0:len(src) - nameLength - 1]
